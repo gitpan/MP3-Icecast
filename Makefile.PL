@@ -9,7 +9,6 @@ WriteMakefile(
                             MP3::Info      => 1.02,
                             File::Spec     => 0.86,
                             File::Basename => 2.71,
-                            File::MimeInfo => 0.8,
                             URI::Escape    => 0,
                             IO::File       => 1.09,
                            },

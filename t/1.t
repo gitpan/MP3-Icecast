@@ -22,12 +22,10 @@ ok(1);
 
 $icy->recursive(1);
 
-#$icy->add_directory('./mp3');
-$icy->add_directory('/home/mp3/sonny_rollins');
+$icy->add_directory('./mp3');
 ok(2);
 
 $icy->alias('mp3'=>'http://localhost/mp3');
 
 warn $icy->m3u if DEBUG;
 warn $icy->pls if DEBUG;
-

@@ -90,17 +90,18 @@ it under the same terms as Perl itself.
 
 use strict;
 use File::Spec;
-use File::Basename 'dirname','basename';
-use File::MimeInfo;
+use File::Basename 'dirname','basename','fileparse';
 use URI::Escape;
 use IO::File;
 use MP3::Info;
 
 use constant DEBUG => 0;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
-our %AUDIO = map {$_=>1} qw(audio/x-mp3);
+our %AUDIO = (
+               '.mp3' => 'audio/x-mp3',
+             );
 our %FORMAT_FIELDS = (
                       a => 'artist',
                       c => 'comment',
@@ -216,13 +217,14 @@ sub _process_directory{
 sub add_file{
    my ($self,$file) = @_;
 
+   my(undef,undef,$extension) = fileparse($file,keys(%AUDIO));
    warn "adding file $file" if DEBUG;
-   warn mimetype($file) if DEBUG;
+   warn $extension if DEBUG;
 
    if(!-f $file or !-r $file){
      warn "not a readable file: $file" if DEBUG;
      return undef;
-   } elsif($AUDIO{mimetype($file)}) {
+   } elsif($AUDIO{lc($extension)}) {
      warn "adding $file" if DEBUG;
      push @{$self->{files}}, $file;
    } else {
@@ -415,7 +417,7 @@ sub stream{
    my $description = $self->description($file) || 'unknown';
    my $bitrate = $info->bitrate                || 0;
    my $size = -s $file                         || 0;
-   my $mime = mimetype($file);
+   my $mime = $AUDIO{ lc((fileparse($file,keys(%AUDIO)))[2]) };
    my $path = $self->_mangle_path($file);
 
    my $fh = $self->_open_file($file) || die "couldn't open file $file: $!";
@@ -510,7 +512,7 @@ sub _mangle_path{
      last;
    }
    $self->_uri_path_escape(\$path);
-   $path = $self->prefix . $path . $self->postfix;
+   $path = join '', ($self->prefix ||'', $path ||'', $self->postfix ||'');
    return $path;
 }
 
